@@ -5,6 +5,21 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from dotenv import load_dotenv
 
+# Logo and information
+logo = r"""
+  ______ __  __ __     __     ___       __         ______          
+ / ___(_) /_/ // /_ __/ /    / _ |__ __/ /____    / __/ /____ _____
+/ (_ / / __/ _  / // / _ \  / __ / // / __/ _ \  _\ \/ __/ _ `/ __/
+/___/_/\__/_//_/\_,_/_.__/ /_/ |_\_,_/\__/\___/ /___/\__/\_,_/_/
+"""
+print("--------------------------------------------------")
+print(logo)
+print("GitHub Auto Star")
+print("Made by 💜 from Zigao Wang.")
+print("This project is licensed under MIT License.")
+print("GitHub Repo: https://github.com/ZigaoWang/github-auto-star/")
+print("--------------------------------------------------")
+
 # Disclaimer
 print("DISCLAIMER: This script may violate GitHub's community guidelines.")
 print("Use this script for educational purposes only.")
