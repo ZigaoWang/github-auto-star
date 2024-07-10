@@ -12,7 +12,7 @@ GitHub Auto Star is a Python script that automates the process of starring repos
 
 - Automatically log in to GitHub using your credentials.
 - Star repositories on a specified user's repository page.
-- Adjustable speed modes (fast, medium, random).
+- Adjustable speed modes (fast, medium, slow, random).
 
 ## Requirements
 
