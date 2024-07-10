@@ -82,19 +82,21 @@ def star_repositories(page, delay):
 # Prompt the user for the speed mode
 default_speed_mode = "random"
 
-speed_mode_input = input(f"Enter speed mode (fast, medium, random) (default {default_speed_mode}): ").strip().lower()
+speed_mode_input = input(f"Enter speed mode (fast, medium, slow, random) (default {default_speed_mode}): ").strip().lower()
 speed_mode = speed_mode_input if speed_mode_input else default_speed_mode
 
 # Set delay based on speed mode
 if speed_mode == "fast":
-    delay = 2  # 2 seconds
+    delay = 0.1
 elif speed_mode == "medium":
-    delay = 5  # 5 seconds
+    delay = 1
+elif speed_mode == "slow":
+    delay = 5
 elif speed_mode == "random":
-    delay = random.uniform(5, 10)  # Random delay between 5 and 10 seconds
+    delay = random.uniform(0.1, 10)
 else:
     print("Invalid speed mode. Defaulting to random.")
-    delay = random.uniform(5, 10)  # Random delay between 5 and 10 seconds
+    delay = random.uniform(0.1, 10)
 
 print("Starting now")
 
