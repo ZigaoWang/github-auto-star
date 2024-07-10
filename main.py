@@ -24,10 +24,11 @@ load_dotenv()
 github_username = os.getenv("GITHUB_USERNAME")
 github_password = os.getenv("GITHUB_PASSWORD")
 
-# Prompt the user for the GitHub user repositories URL
-default_repos_url = "https://github.com/ZigaoWang?tab=repositories"
-repos_url = input(f"Enter the GitHub user repositories URL (default {default_repos_url}): ").strip()
-repos_url = repos_url if repos_url else default_repos_url
+# Prompt the user for the GitHub user URL
+default_user_url = "https://github.com/ZigaoWang"
+user_url = input(f"Enter the GitHub user URL (default {default_user_url}): ").strip()
+user_url = user_url if user_url else default_user_url
+repos_url = f"{user_url}?tab=repositories"
 
 # Function to log in to GitHub
 def github_login(username, password):
@@ -44,8 +45,8 @@ def github_login(username, password):
     time.sleep(2)
 
 # Function to star repositories on the user's repositories page
-def star_repositories(delay):
-    driver.get(repos_url)
+def star_repositories(page, delay):
+    driver.get(f"{repos_url}&page={page}")
     time.sleep(3)
 
     # Find all star buttons on the page
@@ -90,8 +91,15 @@ github_login(github_username, github_password)
 
 # Star repositories
 repos_starred = 0
+page = 1
 try:
-    repos_starred = star_repositories(delay)
+    while True:
+        starred_on_page = star_repositories(page, delay)
+        if starred_on_page:
+            repos_starred += starred_on_page
+            page += 1
+        else:
+            break
 except KeyboardInterrupt:
     print("Program interrupted by user.")
 
