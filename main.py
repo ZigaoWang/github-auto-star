@@ -1,127 +1,122 @@
 import os
-import time
+import sys
+# import time
 import random
+from urllib.parse import urlparse
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.by import By
 from dotenv import load_dotenv
+from engine import github_login, star_repositories, star_organization
 
-# Logo and information
-logo = r"""
-  ______ __  __ __     __     ___       __         ______          
- / ___(_) /_/ // /_ __/ /    / _ |__ __/ /____    / __/ /____ _____
-/ (_ / / __/ _  / // / _ \  / __ / // / __/ _ \  _\ \/ __/ _ `/ __/
-/___/_/\__/_//_/\_,_/_.__/ /_/ |_\_,_/\__/\___/ /___/\__/\_,_/_/
-"""
-print("--------------------------------------------------")
-print(logo)
-print("GitHub Auto Star")
-print("Made by 💜 from Zigao Wang.")
-print("This project is licensed under MIT License.")
-print("GitHub Repo: https://github.com/ZigaoWang/github-auto-star/")
-print("--------------------------------------------------")
+if __name__ == '__main__':
 
-# Disclaimer
-print("DISCLAIMER: This script may violate GitHub's community guidelines.")
-print("Use this script for educational purposes only.")
-print("To stop the script at any time, press Ctrl+C.")
-print("--------------------------------------------------")
+    # Logo and information
+    logo = r"""
+      ______ __  __ __     __     ___       __         ______          
+     / ___(_) /_/ // /_ __/ /    / _ |__ __/ /____    / __/ /____ _____
+    / (_ / / __/ _  / // / _ \  / __ / // / __/ _ \  _\ \/ __/ _ `/ __/
+    /___/_/\__/_//_/\_,_/_.__/ /_/ |_\_,_/\__/\___/ /___/\__/\_,_/_/
+    """
+    print("--------------------------------------------------")
+    print(logo)
+    print("GitHub Auto Star")
+    print("Made by 💜 from Zigao Wang.")
+    print("This project is licensed under MIT License.")
+    print("GitHub Repo: https://github.com/ZigaoWang/github-auto-star/")
+    print("--------------------------------------------------")
 
-# Ensure the user reads and agrees to the disclaimer
-agreement = input("Type 'agree' to continue: ").strip().lower()
-if agreement != 'agree':
-    print("You did not agree to the disclaimer. Exiting...")
-    exit()
+    # Disclaimer
+    print("DISCLAIMER: This script may violate GitHub's community guidelines.")
+    print("Use this script for educational purposes only.")
+    print("To stop the script at any time, press Ctrl+C.")
+    print("--------------------------------------------------")
 
-# Load environment variables from .env file
-load_dotenv()
+    # Ensure the user reads and agrees to the disclaimer
+    agreement = input("Type 'agree' to continue: ").strip().lower()
+    if agreement != 'agree':
+        print("You did not agree to the disclaimer. Exiting...")
+        sys.exit(-1)
 
-# Get GitHub credentials from environment variables
-github_username = os.getenv("GITHUB_USERNAME")
-github_password = os.getenv("GITHUB_PASSWORD")
+    # Load environment variables from .env file
+    load_dotenv()
 
-# Prompt the user for the GitHub user URL
-default_user_url = "https://github.com/ZigaoWang"
-user_url = input(f"Enter the GitHub user URL (default {default_user_url}): ").strip()
-user_url = user_url if user_url else default_user_url
-repos_url = f"{user_url}?tab=repositories"
+    # Get GitHub credentials from environment variables
+    github_username = os.getenv("GITHUB_USERNAME")
+    github_password = os.getenv("GITHUB_PASSWORD")
 
-# Function to log in to GitHub
-def github_login(username, password):
-    driver.get("https://github.com/login")
-    time.sleep(2)
+    o_input = True if input("User or Organization? [U/O]: ") == "O" else False
 
-    username_input = driver.find_element(By.ID, "login_field")
-    password_input = driver.find_element(By.ID, "password")
-    sign_in_button = driver.find_element(By.NAME, "commit")
+    default_speed_mode = "random"
 
-    username_input.send_keys(username)
-    password_input.send_keys(password)
-    sign_in_button.click()
-    time.sleep(2)
+    speed_mode_input = input(
+        f"Enter speed mode (fast, medium, slow, random) (default {default_speed_mode}): ").strip().lower()
+    speed_mode = speed_mode_input if speed_mode_input else default_speed_mode
 
-# Function to star repositories on the user's repositories page
-def star_repositories(page, delay):
-    driver.get(f"{repos_url}&page={page}")
-    time.sleep(3)
+    delay_dict = {"fast": 0.1, "medium": 1, "slow": 5, "random": random.uniform(0.1, 10)}
+    # Set delay based on speed mode
+    try:
+        delay = delay_dict[speed_mode]
+    except Exception as e:
+        print("Wrong speed mode.")
+        sys.exit(-1)
 
-    # Find all star buttons on the page
-    star_buttons = driver.find_elements(By.XPATH, "//button[contains(@aria-label, 'Star this repository')]")
+    # Star repositories
+    repos_starred = 0
+    page = 1
 
-    if not star_buttons:
-        return False  # No star buttons found, likely end of repositories
+    if o_input:
+        # Prompt the user for the GitHub user URL
+        default_org_url = "https://github.com/OblivionOcean"
+        org_url = input(f"Enter the GitHub Organization URL (default {default_org_url}): ").strip()
+        org_url = org_url if org_url else default_org_url
+        org_name = urlparse(org_url).path.strip("/")
+        real_url = f"https://github.com/orgs/{org_name}/repositories"
 
-    for button in star_buttons:
+        print("Starting now.")
+        driver = webdriver.Chrome()
+        github_login(github_username, github_password, driver)
+
         try:
-            button.click()
-            time.sleep(delay)
-        except Exception as e:
-            print(f"Error clicking star button: {e}")
+            while True:
+                starred_on_page = star_organization(page, delay, driver, real_url)
+                if starred_on_page:
+                    repos_starred += starred_on_page
+                    page += 1
+                else:
+                    break
+        except KeyboardInterrupt:
+            print("Program interrupted by user.")
 
-    return len(star_buttons)
+        # Output the number of repositories starred
+        print(f"Total repositories starred: {repos_starred}")
 
-# Prompt the user for the speed mode
-default_speed_mode = "random"
+    else:
+        # Prompt the user for the GitHub user URL
+        default_user_url = "https://github.com/ZigaoWang"
+        user_url = input(f"Enter the GitHub user URL (default {default_user_url}): ").strip()
+        user_url = user_url if user_url else default_user_url
+        repos_url = f"{user_url}?tab=repositories"
 
-speed_mode_input = input(f"Enter speed mode (fast, medium, slow, random) (default {default_speed_mode}): ").strip().lower()
-speed_mode = speed_mode_input if speed_mode_input else default_speed_mode
+        print("Starting now.")
 
-# Set delay based on speed mode
-if speed_mode == "fast":
-    delay = 0.1
-elif speed_mode == "medium":
-    delay = 1
-elif speed_mode == "slow":
-    delay = 5
-elif speed_mode == "random":
-    delay = random.uniform(0.1, 10)
-else:
-    print("Invalid speed mode. Defaulting to random.")
-    delay = random.uniform(0.1, 10)
+        # Log in to GitHub
+        driver = webdriver.Chrome()
+        github_login(github_username, github_password, driver)
 
-print("Starting now")
+        try:
+            while True:
+                starred_on_page = star_repositories(page, delay, driver, repos_url)
+                if starred_on_page:
+                    repos_starred += starred_on_page
+                    page += 1
+                else:
+                    break
+        except KeyboardInterrupt:
+            print("Program interrupted by user.")
 
-# Create a new Chrome session
-driver = webdriver.Chrome()
+        # Output the number of repositories starred
+        print(f"Total repositories starred: {repos_starred}")
 
-# Log in to GitHub
-github_login(github_username, github_password)
-
-# Star repositories
-repos_starred = 0
-page = 1
-try:
-    while True:
-        starred_on_page = star_repositories(page, delay)
-        if starred_on_page:
-            repos_starred += starred_on_page
-            page += 1
-        else:
-            break
-except KeyboardInterrupt:
-    print("Program interrupted by user.")
-
-# Output the number of repositories starred
-print(f"Total repositories starred: {repos_starred}")
-
-# Close the browser
-driver.quit()
+    # Close the browser
+    driver.quit()
+    sys.exit(0)
