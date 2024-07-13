@@ -10,8 +10,6 @@ from engine import github_login, star_repositories, star_organization
 
 if __name__ == '__main__':
 
-    driver = webdriver.Chrome()
-
     # Logo and information
     logo = r"""
       ______ __  __ __     __     ___       __         ______          
@@ -57,7 +55,7 @@ if __name__ == '__main__':
     delay_dict = {"fast": 0.1, "medium": 1, "slow": 5, "random": random.uniform(0.1, 10)}
     # Set delay based on speed mode
     try:
-        delay = delay_dict["speed_mode"]
+        delay = delay_dict[speed_mode]
     except Exception as e:
         print("Wrong speed mode.")
         sys.exit(-1)
@@ -75,7 +73,7 @@ if __name__ == '__main__':
         real_url = f"https://github.com/orgs/{org_name}/repositories"
 
         print("Starting now.")
-
+        driver = webdriver.Chrome()
         github_login(github_username, github_password, driver)
 
         try:
@@ -102,6 +100,7 @@ if __name__ == '__main__':
         print("Starting now.")
 
         # Log in to GitHub
+        driver = webdriver.Chrome()
         github_login(github_username, github_password, driver)
 
         try:

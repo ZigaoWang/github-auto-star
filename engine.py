@@ -17,7 +17,7 @@ def github_login(username, password, driver):
     username_input.send_keys(username)
     password_input.send_keys(password)
     sign_in_button.click()
-    time.sleep(2)
+    time.sleep(5)
 
 
 def star_repositories(page, delay, driver, url):
@@ -43,8 +43,13 @@ def star_repositories(page, delay, driver, url):
 def star_organization(page, delay, driver, url):
     driver.get(f"{url}?page={page}")
     time.sleep(3)
-
-    links = driver.find_elements(By.XPATH, '//a[data-testid="listitem-title-link"]')
+    success = 0
+    links = []
+    elements = driver.find_elements(By.XPATH, '//a[@data-testid="listitem-title-link"]')
+    for element in elements:
+        url = element.get_attribute("href")
+        links.append(url)
+    print(links)
 
     if not links:
         return False
@@ -52,10 +57,11 @@ def star_organization(page, delay, driver, url):
     for link in links:
         try:
             driver.get(link)
-            star_button = driver.find_elements(By.XPATH, "//button[contains(@aria-label, 'Star this repository')]")
+            star_button = driver.find_elements(By.XPATH, "//button[contains(@aria-label, 'Star this repository')]")[0]
             star_button.click()
             time.sleep(delay)
+            success += 1
         except Exception as e:
             print(f"Error clicking star button: {e}")
 
-    return len(links)
+    return success
